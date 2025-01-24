@@ -42,20 +42,48 @@ public class CursoServiceImpl implements CursoService{
 
     @Override
     public Optional<Usuario> addUser(Usuario usuario, Long id) {
-        Optional<Curso> optional = repository.findById(id);
-        if(optional.isPresent()){
+        Optional<Curso> optionalCurso = repository.findById(id);
+        if (optionalCurso.isPresent()) {
+            Curso curso = optionalCurso.get();
+
+            // Verificar si el usuario ya está matriculado en el curso
+            for (CursoUsuario cursoUsuario : curso.getCursoUsuarios()) {
+                if (cursoUsuario.getUsuarioId().equals(usuario.getId())) {
+                    return Optional.empty(); // El usuario ya está matriculado
+                }
+            }
+
+            // Si el usuario no está matriculado, añadirlo
             Usuario usuarioTemp = clientRest.findById(usuario.getId());
-
-            Curso curso = optional.get();
             CursoUsuario cursoUsuario = new CursoUsuario();
-
             cursoUsuario.setUsuarioId(usuarioTemp.getId());
-
-            curso.addCursoUsuario(cursoUsuario);
+            curso.addCursoUsuario(cursoUsuario); // Añadir la relación
             repository.save(curso);
 
             return Optional.of(usuarioTemp);
         }
         return Optional.empty();
     }
+
+
+    @Override
+    public Optional<Usuario> removeUser(Long usuarioId, Long cursoId) {
+        Optional<Curso> optionalCurso = repository.findById(cursoId);
+        if (optionalCurso.isPresent()) {
+            Curso curso = optionalCurso.get();
+
+            // Buscar y eliminar la relación de usuario con el curso
+            for (CursoUsuario cursoUsuario : curso.getCursoUsuarios()) {
+                if (cursoUsuario.getUsuarioId().equals(usuarioId)) {
+                    curso.removeCursoUsuario(cursoUsuario); // Eliminar la relación
+                    repository.save(curso);
+                    // Devolver el usuario desmatriculado
+                    return Optional.of(new Usuario(usuarioId));
+                }
+            }
+        }
+        return Optional.empty(); // El usuario no estaba matriculado
+    }
+
+
 }

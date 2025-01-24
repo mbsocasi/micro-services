@@ -13,4 +13,6 @@ public interface CursoService {
     void deleteById(Long id);
 
     Optional<Usuario> addUser (Usuario usuario, Long id);
+    Optional<Usuario> removeUser(Long usuarioId, Long cursoId);
+
 }

@@ -67,17 +67,46 @@ public class CursoController {
         }
     }
 
-    @PostMapping("/{id}")
+    // Método para matricular un usuario en un curso
+    @PostMapping("/{id}/matricular")
     public ResponseEntity<?> addUser(@PathVariable Long id, @RequestBody Usuario usuario) {
-        Optional<Usuario> optional;
-        try{
-            optional = cursoService.addUser(usuario, id);
-        }catch (FeignException ex){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "Usuario no encontrado" + ex.getMessage()));
+        Optional<Usuario> optionalUsuario;
+        try {
+            // Validación de existencia de usuario en el microservicio de usuarios a través de Feign
+            optionalUsuario = cursoService.addUser(usuario, id);
+        } catch (FeignException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", "Usuario no encontrado: " + ex.getMessage()));
         }
-        if (optional.isPresent()){
-            return ResponseEntity.status(HttpStatus.CREATED).body(optional.get());
-    }
+
+        if (optionalUsuario.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(optionalUsuario.get());
+        }
         return ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/{cursoId}/desmatricular/{usuarioId}")
+    public ResponseEntity<?> removeUser(@PathVariable Long cursoId, @PathVariable Long usuarioId) {
+        Optional<Curso> optionalCurso = cursoService.findById(cursoId);
+
+        if (optionalCurso.isPresent()) {
+            Optional<Usuario> usuarioDesmatriculado = cursoService.removeUser(usuarioId, cursoId);
+
+            if (usuarioDesmatriculado.isPresent()) {
+                // Devuelve un mensaje de éxito si el usuario fue desmatriculado
+                return ResponseEntity.ok("Usuario desmatriculado correctamente");
+            } else {
+                // Si no se encuentra al usuario, devuelve un mensaje de error
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Usuario no encontrado en este curso");
+            }
+        }
+
+        // Si el curso no existe, devuelve un mensaje de error
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Curso no encontrado");
+    }
+
+
+
+
 }

@@ -12,10 +12,13 @@ public class Curso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String nombre;
+
     @Column(nullable = false)
     private String descripcion;
+
     @Column(nullable = false)
     private int creditos;
 
@@ -31,6 +34,11 @@ public class Curso {
         usuarios = new ArrayList<>();
     }
 
+    // Métodos para gestionar los cursoUsuarios
+    public List<CursoUsuario> getCursoUsuarios() {
+        return cursoUsuarios;
+    }
+
     public void addCursoUsuario(CursoUsuario cursoUsuario) {
         cursoUsuarios.add(cursoUsuario);
     }
@@ -39,6 +47,7 @@ public class Curso {
         cursoUsuarios.remove(cursoUsuario);
     }
 
+    // Getters y setters para el resto de atributos
     public Long getId() {
         return id;
     }
@@ -71,3 +80,4 @@ public class Curso {
         this.creditos = creditos;
     }
 }
+

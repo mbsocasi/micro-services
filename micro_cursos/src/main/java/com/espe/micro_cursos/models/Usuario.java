@@ -12,6 +12,11 @@ public class Usuario {
     private Date fechaNacimiento;
     private Date creadoEn;
 
+    // Constructor con Long id
+    public Usuario(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }
